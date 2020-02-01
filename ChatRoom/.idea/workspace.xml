@@ -31,7 +31,8 @@
     <property name="configurable.Project.GOPATH.is.expanded" value="true" />
     <property name="go.import.settings.migrated" value="true" />
     <property name="last_opened_file_path" value="$USER_HOME$" />
-    <property name="settings.editor.selected.configurable" value="reference.settingsdialog.IDE.editor.colors.Color Scheme Font" />
+    <property name="restartRequiresConfirmation" value="false" />
+    <property name="settings.editor.selected.configurable" value="settings.saveactions" />
   </component>
   <component name="RunManager">
     <configuration name="go build main.go" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
@@ -68,26 +69,42 @@
       <screen x="0" y="23" width="1680" height="987" />
     </state>
     <state x="533" y="179" key="#go_build_main.go/0.23.1680.987@0.23.1680.987" timestamp="1580541164601" />
-    <state width="1638" height="269" key="GridCell.Tab.0.bottom" timestamp="1580539512557">
+    <state width="1638" height="214" key="GridCell.Tab.0.bottom" timestamp="1580566772829">
       <screen x="0" y="23" width="1680" height="987" />
     </state>
-    <state width="1638" height="269" key="GridCell.Tab.0.bottom/0.23.1680.987@0.23.1680.987" timestamp="1580539512557" />
-    <state width="1638" height="269" key="GridCell.Tab.0.center" timestamp="1580539512557">
+    <state width="1638" height="214" key="GridCell.Tab.0.bottom/0.23.1680.987@0.23.1680.987" timestamp="1580566772829" />
+    <state width="1638" height="214" key="GridCell.Tab.0.center" timestamp="1580566772828">
       <screen x="0" y="23" width="1680" height="987" />
     </state>
-    <state width="1638" height="269" key="GridCell.Tab.0.center/0.23.1680.987@0.23.1680.987" timestamp="1580539512557" />
-    <state width="1638" height="269" key="GridCell.Tab.0.left" timestamp="1580539512556">
+    <state width="1638" height="214" key="GridCell.Tab.0.center/0.23.1680.987@0.23.1680.987" timestamp="1580566772828" />
+    <state width="1638" height="214" key="GridCell.Tab.0.left" timestamp="1580566772827">
       <screen x="0" y="23" width="1680" height="987" />
     </state>
-    <state width="1638" height="269" key="GridCell.Tab.0.left/0.23.1680.987@0.23.1680.987" timestamp="1580539512556" />
-    <state width="1638" height="269" key="GridCell.Tab.0.right" timestamp="1580539512557">
+    <state width="1638" height="214" key="GridCell.Tab.0.left/0.23.1680.987@0.23.1680.987" timestamp="1580566772827" />
+    <state width="1638" height="214" key="GridCell.Tab.0.right" timestamp="1580566772828">
       <screen x="0" y="23" width="1680" height="987" />
     </state>
-    <state width="1638" height="269" key="GridCell.Tab.0.right/0.23.1680.987@0.23.1680.987" timestamp="1580539512557" />
-    <state x="391" y="131" key="SettingsEditor" timestamp="1580539654272">
+    <state width="1638" height="214" key="GridCell.Tab.0.right/0.23.1680.987@0.23.1680.987" timestamp="1580566772828" />
+    <state width="1638" height="214" key="GridCell.Tab.1.bottom" timestamp="1580566772753">
       <screen x="0" y="23" width="1680" height="987" />
     </state>
-    <state x="391" y="131" key="SettingsEditor/0.23.1680.987@0.23.1680.987" timestamp="1580539654272" />
+    <state width="1638" height="214" key="GridCell.Tab.1.bottom/0.23.1680.987@0.23.1680.987" timestamp="1580566772753" />
+    <state width="1638" height="214" key="GridCell.Tab.1.center" timestamp="1580566772752">
+      <screen x="0" y="23" width="1680" height="987" />
+    </state>
+    <state width="1638" height="214" key="GridCell.Tab.1.center/0.23.1680.987@0.23.1680.987" timestamp="1580566772752" />
+    <state width="1638" height="214" key="GridCell.Tab.1.left" timestamp="1580566772752">
+      <screen x="0" y="23" width="1680" height="987" />
+    </state>
+    <state width="1638" height="214" key="GridCell.Tab.1.left/0.23.1680.987@0.23.1680.987" timestamp="1580566772752" />
+    <state width="1638" height="214" key="GridCell.Tab.1.right" timestamp="1580566772753">
+      <screen x="0" y="23" width="1680" height="987" />
+    </state>
+    <state width="1638" height="214" key="GridCell.Tab.1.right/0.23.1680.987@0.23.1680.987" timestamp="1580566772753" />
+    <state x="571" y="174" key="SettingsEditor" timestamp="1580564573475">
+      <screen x="0" y="23" width="1680" height="987" />
+    </state>
+    <state x="571" y="174" key="SettingsEditor/0.23.1680.987@0.23.1680.987" timestamp="1580564573475" />
     <state x="925" y="240" width="670" height="676" key="search.everywhere.popup" timestamp="1580538976177">
       <screen x="0" y="23" width="1680" height="987" />
     </state>

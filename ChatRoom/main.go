@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"net"
-	"time"
 )
 
 // 用户结构体类型
@@ -19,7 +18,7 @@ type Client struct {
 // 全局map 存储线上用户
 var onLineUserMap = make(map[string]Client)
 
-// global channel, deliver user message
+// global channel, deliver msg message to all clients
 var message = make(chan string)
 
 var p = fmt.Println
@@ -60,7 +59,7 @@ func Manager() {
 	}
 }
 
-// 处理链接
+// handle connection
 func HandlerConnect(conn net.Conn) {
 	defer conn.Close()
 	// get user ip and port
@@ -75,15 +74,41 @@ func HandlerConnect(conn net.Conn) {
 	// 创建专门用来给当前用户送数据的 go 程
 	go WriteMsg2Client(clnt, conn)
 
+	// 一个匿名 go 程,用,来发用户的消息
+	go func() {
+		// 循环读取消息
+		buf := make([]byte, 4096)
+		for {
+			n, err := conn.Read(buf)
+			if n == 0 {
+				p("[ 📢  Detected @" + clnt.Name + " has disconnected ⤵️ ] \n")
+				message <- "[ 📢 \a @" + clnt.Name + " has disconnected ⤵️ ] \n"
+				return
+			}
+			if err != nil {
+				p("err during conn.Read", err)
+				return
+			}
+			msg := string(buf[:n])
+			// send msg to all clnts
+			message <- produceMsg(clnt, msg)
+		}
+	}()
 	// send "user is login" line to global channel
 	// TODO
-	message <- "[⬆️ " + string(time.Now().Second()) + " " + clnt.Name + " has login]"
+	p("[ 📢   #" + clnt.Addr + " | @" + clnt.Name + " - has login ⬆️  ]")
+	message <- "[ 📢 \a  #" + clnt.Addr + " | @" + clnt.Name + " - has login ⬆️  ]"
 	for {
 
 	}
 }
 
-// this func is for write message to client
+// produce message
+func produceMsg(clnt Client, msg string) string {
+	return "[ 📣 \a #" + clnt.Addr + " @" + clnt.Name + "] says: \n" + msg + "--------------------------"
+}
+
+// write message to client
 func WriteMsg2Client(clnt Client, conn net.Conn) {
 	// 监听用户自带 channel 是否有消息
 	// TODO
