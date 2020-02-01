@@ -89,9 +89,30 @@ func HandlerConnect(conn net.Conn) {
 				p("err during conn.Read", err)
 				return
 			}
-			msg := string(buf[:n])
-			// send msg to all clnts
-			message <- produceMsg(clnt, msg)
+			// 获取用户指令 来判断用户意图
+
+			msg := string(buf[:n-1])
+			// get all client list
+			if msg == "WHO" && len(msg) == 3 {
+				conn.Write([]byte(" 👥  All online users:\n"))
+				//  遍历 map
+				for _, client := range onLineUserMap {
+					userInfo := "🕸  IpAddress: " + client.Addr + " 🗿  Name: " + client.Name + "\n"
+					_, err := conn.Write([]byte(userInfo))
+					if err != nil {
+						p("err during 'WHO'", err)
+						return
+					}
+				}
+				// rename : 判断开头是否为 RENAME2: && 利用切片来获取命名
+				// "RENAME2:"
+			} else if len(msg) >= 9 && msg[:8] == "RENAME2:" {
+				newName := msg[8:]
+				renameClnt(clnt, newName)
+			} else {
+				// send msg to all clnts
+				message <- produceMsg(clnt, msg)
+			}
 		}
 	}()
 	// send "user is login" line to global channel
@@ -103,9 +124,15 @@ func HandlerConnect(conn net.Conn) {
 	}
 }
 
+// rename current client
+func renameClnt(clnt Client, name string) {
+	clnt.Name = name
+	onLineUserMap[clnt.Addr] = clnt
+}
+
 // produce message
 func produceMsg(clnt Client, msg string) string {
-	return "[ 📣 \a #" + clnt.Addr + " @" + clnt.Name + "] says: \n" + msg + "--------------------------"
+	return "[ 📣 \a #" + clnt.Addr + " @" + clnt.Name + "] says: \n" + msg + "\n--------------------------"
 }
 
 // write message to client
