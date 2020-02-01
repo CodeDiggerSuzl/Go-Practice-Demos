@@ -41,6 +41,8 @@ func HandlerConnect(conn net.Conn) {
 	p("[ 📢   #" + clnt.Addr + " | @" + clnt.Name + " - has login ⬆️  ]")
 	message <- "[ 📢 \a  #" + clnt.Addr + " | @" + clnt.Name + " - has login ⬆️  ]"
 
+	// a chan watch the client is quit or not
+	quitStat := make(chan bool)
 	// 一个匿名 go 程,用,来发用户的消息
 	go func() {
 		// 循环读取消息
@@ -49,8 +51,8 @@ func HandlerConnect(conn net.Conn) {
 		for {
 			n, err := conn.Read(buf)
 			if n == 0 {
+				quitStat <- true
 				p("[ 📢  Detected @" + clnt.Name + " has disconnected ⤵️ ] \n")
-				message <- "[ 📢 \a @" + clnt.Name + " has disconnected ⤵️ ] \n"
 				return
 			}
 			if err != nil {
@@ -67,20 +69,31 @@ func HandlerConnect(conn net.Conn) {
 
 			// rename
 			case len(msg) >= 9 && msg[:8] == "RENAME2:":
-
 				clnt.Name = msg[8:] // 修改结构体成员name
 				onLineUserMap[clnt.Addr] = clnt
 				// rename(clnt, msg) // 更新 onLineUserMap
 				conn.Write([]byte("✅  Rename successfully\n"))
 
+			case msg == "EXIT" && len(msg) == 4:
+				quitStat <- true
+				conn.Write([]byte("bye~ \n"))
+				conn.Close()
+				return
 			default:
 				// send msg to all clnts
 				message <- produceMsg(clnt, msg)
 			}
 		}
 	}()
+	// use loop to watch the quitStat has data flow or not
 	for {
-
+		select {
+		case <-quitStat:
+			// delete clnt in map
+			delete(onLineUserMap, clnt.Addr)
+			// broadcast clint
+			message <- "[ 📢 \a @" + clnt.Name + " has disconnected ⤵️ ] \n"
+		}
 	}
 }
 
