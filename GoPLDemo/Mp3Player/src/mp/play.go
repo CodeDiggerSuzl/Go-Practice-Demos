@@ -6,7 +6,7 @@ type Player interface {
 	Play(source string)
 }
 
-func Play(source, mtype string) {
+func PlayMusic(source, mtype string) {
 	var p Player
 	switch mtype {
 	// 接口赋值

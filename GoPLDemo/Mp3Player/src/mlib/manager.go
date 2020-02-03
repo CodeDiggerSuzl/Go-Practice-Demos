@@ -71,6 +71,7 @@ func (m *MusicManager) Remove(index int) *MusicEntry {
 		return nil
 	}
 	removeMusic := &m.musics[index]
+	// TODO
 	m.musics = append(m.musics[:index], m.musics[index+1:]...)
 	return removeMusic
 }
