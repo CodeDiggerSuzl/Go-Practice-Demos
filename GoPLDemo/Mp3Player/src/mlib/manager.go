@@ -2,6 +2,7 @@ package mlib
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 )
 
@@ -67,11 +68,11 @@ func (m *MusicManager) Add(music *MusicEntry) {
 }
 
 func (m *MusicManager) Remove(index int) *MusicEntry {
-	if index < 0 || index > len(m.musics) {
+	if index < 0 || index >= len(m.musics) {
+		fmt.Println("❌ music not found")
 		return nil
 	}
 	removeMusic := &m.musics[index]
-	// TODO
 	m.musics = append(m.musics[:index], m.musics[index+1:]...)
 	return removeMusic
 }
