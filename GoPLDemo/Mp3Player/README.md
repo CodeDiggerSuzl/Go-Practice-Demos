@@ -38,7 +38,7 @@ type MusicEntry struct{
 ```
 使用一个数组切片作为基础的储存结构, 其他操作都只是对这个数组切片的包装.
 
-[manager.go](mlib/manager.go)
+[manager.go](./src/mlib/manager.go)
 
 编写 `manager` 后要立马进行单元测试.
 
