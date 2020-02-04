@@ -36,17 +36,17 @@ type MusicEntry struct{
     Type string
 }
 ```
-使用一个数组切片作为基础的储存结构,其他操作都只是对这个数组切片的包装.
+使用一个数组切片作为基础的储存结构, 其他操作都只是对这个数组切片的包装.
 
 [manager.go](mlib/manager.go)
 
-编写`manager`后要立马进行单元测试.
+编写 `manager` 后要立马进行单元测试.
 
 ### ▶️ 音乐播放
 
-音乐播放应该是一个很容易扩展的功能,不应该在动代码的时候就大动代码.
+音乐播放应该是一个很容易扩展的功能, 不应该在动代码的时候就大动代码.
 
-设计一个简单的播放函数 `func Play(source, mtype string)`,没直接传入`MusicEntry`是因为它包含了很多多余的信息.本着最小的原则,设计一个简单的接口.
+设计一个简单的播放函数 `func Play(source, mtype string)`, 没直接传入 `MusicEntry` 是因为它包含了很多多余的信息. 本着最小的原则, 设计一个简单的接口.
 
 ```go
 type Player interface{
@@ -54,5 +54,14 @@ type Player interface{
 }
 ```
 
-## 主程序
+### 主程序
+和面向对象关系不大, 简写代码.
 
+[main.go](./src/main.go)
+
+### 遗留问题
+1. 多任务的加入: 用户界面, 音乐播放,视频播放等功能. 可以使用`goroutine` 来进行完善.
+2. 对播放的控制: 暂停,停止设置播放位置等, 使用`channel`和`goroutine`来实现.
+
+## 小结
+Go 看似简陋的面向对象的编程特性已经能够满足需求.
