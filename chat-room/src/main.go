@@ -31,7 +31,7 @@ var p = fmt.Println
 
 func main() {
 	// 创建监听套接字
-	listener, err := net.Listen("tcp", ":8848")
+	listener, err := net.Listen("tcp", "127.0.0.1:8848")
 	defer listener.Close()
 	if err != nil {
 		p(" ❌ err during net.Listen", err)
