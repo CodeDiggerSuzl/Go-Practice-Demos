@@ -65,6 +65,7 @@ func HandlerConnect(conn net.Conn) {
 		"EXIT: To exit the chat room\n\t" +
 		"CHAT:<UserId>: To start a chat with one user.\n" +
 		"Here are the current users:\n"))
+
 	// get user ip and port
 	curClntAddr := conn.RemoteAddr().String()
 	// create Client
@@ -72,6 +73,7 @@ func HandlerConnect(conn net.Conn) {
 	// send "user is login" line to global channel
 	p("[ 📢   #" + clnt.Addr + " | @" + clnt.Name + " - has login ⬆️  ]")
 	message <- "[ 📢 \a  #" + clnt.Addr + " | @" + clnt.Name + " - has login ⬆️  ]"
+
 	// put new clnt into online user map, key:curClntAddr value : Clint
 	onLineUserMap[curClntAddr] = clnt
 	ListClnts(conn)
