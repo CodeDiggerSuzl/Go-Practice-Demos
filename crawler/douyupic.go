@@ -1,49 +1,26 @@
 package main
 
 import (
+    "fmt"
     "io"
-    "log"
     "net/http"
     "os"
     "regexp"
     "strconv"
 )
 
-func GetHTTPUrl(url string) (urlString string, err error) {
-    resp, err1 := http.Get(url)
-    if err1 != nil {
-        err = err1
-        return
-    }
-    defer resp.Body.Close()
-
-    buf := make([]byte, 4096)
-    for {
-        n, err2 := resp.Body.Read(buf)
-        if n == 0 {
-            break
-        }
-        if err2 != nil && err2 != io.EOF {
-            err = err2
-            return
-        }
-        urlString += string(buf[:n])
-    }
-    return
-}
-
-func SavePic(index int, url string, page chan int) {
-    path := "/Users/suzl/dev/golang/go-demos/crawler" + strconv.Itoa(index+1) + ".jpg"
+func SaveImg(idx int, url string, page chan int) {
+    path := "/Users/suzl/dev/golang/go-demos/" + strconv.Itoa(idx+1) + ".jpg"
     f, err := os.Create(path)
     if err != nil {
-        log.Printf("Error during create file:%v", err)
+        fmt.Println(" http.Get err:", err)
         return
     }
     defer f.Close()
 
     resp, err := http.Get(url)
     if err != nil {
-        log.Printf("Error during http.Get :%v", err)
+        fmt.Println(" http.Get err:", err)
         return
     }
     defer resp.Body.Close()
@@ -51,7 +28,6 @@ func SavePic(index int, url string, page chan int) {
     for {
         n, err2 := resp.Body.Read(buf)
         if n == 0 {
-            log.Println("Empty resp.Body")
             break
         }
         if err2 != nil && err2 != io.EOF {
@@ -60,29 +36,56 @@ func SavePic(index int, url string, page chan int) {
         }
         f.Write(buf[:n])
     }
-    page <- index
+    page <- idx
 }
 
 func main() {
     url := "https://www.douyu.com/g_yz"
 
-    // get page and save the page to result
-    result, err := GetHTTPUrl(url)
+    // 爬取 整个页面，将整个页面全部信息，保存在result
+    result, err := HttpGet(url)
     if err != nil {
-        log.Printf("Error during http.Get in main %v", err)
+        fmt.Println("HttpGet err:", err)
         return
     }
-    // get all page an save to the result
+    // 解析编译正则
     ret := regexp.MustCompile(`data-original="(?s:(.*?))"`)
-    // compile through the regEx
+    // 提取每一张图片的 url
     alls := ret.FindAllStringSubmatch(result, -1)
+
     page := make(chan int)
     n := len(alls)
+
     for idx, imgURL := range alls {
-        go SavePic(idx, imgURL[1], page)
+        // fmt.Println("imgURL:", imgURL[1])
+        go SaveImg(idx, imgURL[1], page)
     }
 
     for i := 0; i < n; i++ {
-        log.Printf("%d img is compleat\n", <-page)
+        fmt.Printf("下载第 %d 张图片完成\n", <-page)
     }
+
+}
+
+// 获取一个网页所有的内容， result 返回
+func HttpGet(url string) (result string, err error) {
+    resp, err1 := http.Get(url)
+    if err1 != nil {
+        err = err1
+        return
+    }
+    defer resp.Body.Close()
+    buf := make([]byte, 4096)
+    for {
+        n, err2 := resp.Body.Read(buf)
+        if n == 0 {
+            break
+        }
+        if err2 != nil && err2 != io.EOF {
+            err = err2
+            return
+        }
+        result += string(buf[:n])
+    }
+    return
 }

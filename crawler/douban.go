@@ -2,105 +2,114 @@ package main
 
 import (
     "fmt"
-    "log"
+    "io"
     "net/http"
     "os"
     "regexp"
     "strconv"
-    "time"
 )
 
-// 发起请求，获取网页内容
-func HttpGet(url string) (result string, err error) {
-    resp, err1 := http.Get(url) // 发送get请求
+// 爬取指定url 的页面，返回 result
+func HttpGetDB(url string) (result string, err error) {
+
+    resp, err1 := http.Get(url)
     if err1 != nil {
         err = err1
         return
     }
     defer resp.Body.Close()
 
-    // 读取网页内容
-    buf := make([]byte, 4*1024)
+    buf := make([]byte, 4096)
+    // 循环爬取整页数据
     for {
-        n, _ := resp.Body.Read(buf)
+        n, err2 := resp.Body.Read(buf)
         if n == 0 {
             break
         }
-        result += string(buf[:n]) // 累加读取的内容
+        if err2 != nil && err2 != io.EOF {
+            err = err2
+            return
+        }
+        result += string(buf[:n])
     }
     return
 }
 
-func CrawlPages(i int, page chan int) {
-    log.Println("Crawling page: " + strconv.Itoa(i))
-    url := "https://movie.douban.com/top250?start=" + strconv.Itoa(i*25) + "&filter="
-
-    time.Sleep(1 * time.Second)
-
-    log.Println("Crawling url: ", url)
-    result, err := HttpGet(url)
+func Save2file(idx int, filmName, filmScore, peopleNum [][]string) {
+    path := "/Users/suzl/dev/golang/go-demos/" + "第 " + strconv.Itoa(idx) + " 页.txt"
+    f, err := os.Create(path)
     if err != nil {
-        log.Println("Error during err: ", err)
-        return
-    }
-    re := regexp.MustCompile(`<span>(.*?)人评价</span>`)
-    if re == nil {
-        log.Println("Error during re")
-        return
-    }
-    // rating count
-    ratingCount := re.FindAllStringSubmatch(result, -1)
-    pattern3 := `<span class="rating_num" property="v:average">(.*?)</span>`
-    rp3 := regexp.MustCompile(pattern3)
-    // score
-    fScore := rp3.FindAllStringSubmatch(result, -1)
-    pattern4 := `<img width="100" alt="(.*?)" src="(.*?)" class="">`
-    // movie name
-    rp4 := regexp.MustCompile(pattern4)
-    fName := rp4.FindAllStringSubmatch(result, -1)
-
-    StoreToFile(i, ratingCount, fScore, fName)
-
-    page <- i
-}
-
-func StoreToFile(i int, ratingCount, fsScore, fName [][]string) {
-    f, err := os.Create(strconv.Itoa(i) + ".txt")
-    if err != nil {
-        log.Println("Error during create file", err)
+        fmt.Println("os.Create err:", err)
         return
     }
     defer f.Close()
-    // 写入标题
-    f.WriteString("电影名称 " + "评分" + "\t" + "评价人数" + "\t" + "\r\n")
 
-    // 写内容
-    n := len(ratingCount)
-    fmt.Println("n=", n)
+    n := len(filmName) // 得到 条目数。 应该是 25
+    // 先打印 抬头  电影名称        评分         评分人数
+    f.WriteString("电影名称" + "\t\t\t" + "评分" + "\t\t" + "评分人数" + "\n")
     for i := 0; i < n; i++ {
-        f.WriteString(fName[i][1] + " " + fsScore[i][1] + "\t" + ratingCount[i][1] + "\t" + "\r\n")
+        f.WriteString(filmName[i][1] + "\t\t\t" + filmScore[i][1] + "\t\t" + peopleNum[i][1] + "\n")
     }
 }
 
-func DoWork(start, end int) {
-    fmt.Printf("准备爬取第%d页到%d页的网址\n", start, end)
-    page := make(chan int)
-    for i := start; i <= end; i++ {
-        // 定义一个函数，爬主页面
-        go CrawlPages(i, page)
-    }
+// 爬取一个豆瓣页面数据信息
+func SpiderPageDB(idx int, page chan int) {
+    // 获取 url
+    url := "https://movie.douban.com/top250?start=" + strconv.Itoa((idx-1)*25) + "&filter="
 
-    for i := start; i <= end; i++ {
-        fmt.Printf("第%d个页面爬取完成\n", <-page)
+    // 封装 HttpGet2 爬取 url 对应页面
+    result, err := HttpGetDB(url)
+    if err != nil {
+        fmt.Println("HttpGet2 err:", err)
+        return
     }
+    // fmt.Println("result=", result)
+    // 解析、编译正则表达式 —— 电影名称：
+    ret1 := regexp.MustCompile(`<img width="100" alt="(?s:(.*?))"`)
+    // 提取需要信息
+    filmName := ret1.FindAllStringSubmatch(result, -1)
 
+    // 解析、编译正则表达式 —— 分数：
+    pattern := `<span class="rating_num" property="v:average">(?s:(.*?))</span>`
+    ret2 := regexp.MustCompile(pattern)
+    // 提取需要信息
+    filmScore := ret2.FindAllStringSubmatch(result, -1)
+
+    // 解析、编译正则表达式 —— 评分人数：
+    ret3 := regexp.MustCompile(`<span>(?s:(\d*?))人评价</span>`)
+    // ret3 := regexp.MustCompile(`<span>(.*?)人评价</span>`)
+
+    // 提取需要信息
+    peopleNum := ret3.FindAllStringSubmatch(result, -1)
+
+    // 将提取的有用信息，封装到文件中。
+    Save2file(idx, filmName, filmScore, peopleNum)
+
+    // 与主go程配合 完成同步
+    page <- idx
 }
+
+func toWork(start, end int) {
+    fmt.Printf("正在爬取 %d 到 %d 页...\n", start, end)
+
+    page := make(chan int) // 防止主go 程提前结束
+
+    for i := start; i <= end; i++ {
+        go SpiderPageDB(i, page)
+    }
+
+    for i := start; i <= end; i++ {
+        fmt.Printf("第 %d 页爬取完毕\n", <-page)
+    }
+}
+
 func main() {
+    // 指定爬取起始、终止页
     var start, end int
-    fmt.Printf("请输入起始页( >= 1) :")
+    fmt.Print("请输入爬取的起始页（>=1）:")
     fmt.Scan(&start)
-    fmt.Printf("请输入终止页( >= 起始页) :")
+    fmt.Print("请输入爬取的终止页（>=start）:")
     fmt.Scan(&end)
 
-    DoWork(start, end) // 工作函数
+    toWork(start, end)
 }
